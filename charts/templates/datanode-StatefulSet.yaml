@@ -1,0 +1,43 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.16.0 (0c01309)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: datanode
+  name: datanode
+spec:
+  serviceName: "datanode"
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        io.kompose.service: datanode
+    spec:
+      containers:
+      - env:
+        envFrom:
+          - configMapRef:
+              name: hadoop-env
+        image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+        name: datanode
+        ports:
+        - containerPort: 50075
+        resources: {}
+        volumeMounts:
+        - mountPath: /hadoop/dfs/data
+          name: datanode-claim
+      restartPolicy: Always
+  volumeClaimTemplates:
+    - metadata:
+        name: datanode-claim
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        # uncomment if using slow storageClass on AWS
+        # then no need for running pv or pvc manifests
+        storageClassName: rook-ceph-block
+        resources:
+          requests:
+            storage: 100Gi

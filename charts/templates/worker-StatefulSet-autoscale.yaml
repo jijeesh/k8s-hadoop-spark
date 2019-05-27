@@ -1,0 +1,70 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.16.0 (0c01309)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: worker
+  name: worker
+spec:
+  serviceName: "worker"
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        io.kompose.service: worker
+    spec:
+      containers:
+      - env:
+        envFrom:
+          - configMapRef:
+              name: hadoop-env
+        image: bde2020/spark-worker:2.4.0-hadoop2.7
+        name: worker
+        resources:
+          requests:
+            cpu: "1"
+            memory: "3Gi"
+        volumeMounts:
+        - mountPath: /opt/hdfs
+          name: worker-claim
+        - mountPath: /spark/conf/
+          name: sparkmaster-worker-config
+      restartPolicy: Always
+      volumes:
+      - name: sparkmaster-worker-config
+        configMap:
+          name: sparkmaster-worker
+          items:
+            - key: config
+              path: spark-defaults.conf
+  volumeClaimTemplates:
+    - metadata:
+        name: worker-claim
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        # uncomment if using slow storageClass on AWS
+        # then no need for running pv or pvc manifests
+        storageClassName: rook-ceph-block
+        resources:
+          requests:
+            storage: 100Gi
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: StatefulSet
+    name: worker
+  minReplicas: 5
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 70

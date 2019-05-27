@@ -1,0 +1,29 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.16.0 (0c01309)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: resourcemanager
+  name: resourcemanager
+spec:
+  serviceName: "resourcemanager"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        io.kompose.service: resourcemanager
+    spec:
+      containers:
+      - env:
+        envFrom:
+          - configMapRef:
+              name: hadoop-env
+        image: docker-reg.kore.korewireless.com/dinkand/resourcemanager
+        name: resourcemanager
+        ports:
+        - containerPort: 8088
+        resources: {}
+      restartPolicy: Always

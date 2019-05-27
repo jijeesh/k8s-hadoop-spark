@@ -1,0 +1,58 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.16.0 (0c01309)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: sparkmaster
+  name: sparkmaster
+spec:
+  serviceName: "sparkmaster"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        io.kompose.service: sparkmaster
+    spec:
+      containers:
+      - env:
+        - name: ENABLE_INIT_DAEMON
+          value: "false"
+        - name: SPARK_HOME
+          value: /spark
+        image: bde2020/spark-master:2.4.0-hadoop2.7
+        name: sparkmaster
+        ports:
+        - containerPort: 4040
+        - containerPort: 6066
+        - containerPort: 7070
+        - containerPort: 7077
+        - containerPort: 8080
+        resources: {}
+        volumeMounts:
+        - mountPath: /opt/hdfs
+          name: sparkmaster-claim
+        - mountPath: /spark/conf/
+          name: sparkmaster-worker-config
+      hostname: sparkmaster
+      restartPolicy: Always
+      volumes:
+      - name: sparkmaster-worker-config
+        configMap:
+          name: sparkmaster-worker
+          items:
+            - key: config
+              path: spark-defaults.conf
+  volumeClaimTemplates:
+    - metadata:
+        name: sparkmaster-claim
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        # uncomment if using slow storageClass on AWS
+        # then no need for running pv or pvc manifests
+        storageClassName: rook-ceph-block
+        resources:
+          requests:
+            storage: 100Gi
