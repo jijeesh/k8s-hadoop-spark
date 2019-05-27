@@ -1,0 +1,29 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.16.0 (0c01309)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: nodemanager1
+  name: nodemanager1
+spec:
+  serviceName: "nodemanager1"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        io.kompose.service: nodemanager1
+    spec:
+      containers:
+      - env:
+        envFrom:
+          - configMapRef:
+              name: hadoop-env
+        image: bde2020/hadoop-nodemanager:2.0.0-hadoop2.7.4-java8
+        name: nodemanager1
+        ports:
+        - containerPort: 8042
+        resources: {}
+      restartPolicy: Always

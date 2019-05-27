@@ -1,0 +1,44 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.16.0 (0c01309)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: namenode
+  name: namenode
+spec:
+  serviceName: "namenode"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        io.kompose.service: namenode
+    spec:
+      containers:
+      - env:
+        envFrom:
+          - configMapRef:
+              name: hadoop-env
+        image: docker-reg.kore.korewireless.com/dinkand/namenode
+        name: namenode
+        ports:
+        - containerPort: 8020
+        - containerPort: 50070
+        resources: {}
+        volumeMounts:
+        - mountPath: /hadoop/dfs/name
+          name: namenode-claim
+      restartPolicy: Always
+  volumeClaimTemplates:
+    - metadata:
+        name: namenode-claim
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        # uncomment if using slow storageClass on AWS
+        # then no need for running pv or pvc manifests
+        storageClassName: rook-ceph-block
+        resources:
+          requests:
+            storage: 100Gi

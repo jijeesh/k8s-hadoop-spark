@@ -1,0 +1,183 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.16.0 (0c01309)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: worker
+  name: worker
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        io.kompose.service: worker
+    spec:
+      containers:
+      - env:
+        - name: CORE_CONF_fs_defaultFS
+          valueFrom:
+            configMapKeyRef:
+              key: CORE_CONF_fs_defaultFS
+              name: hadoop-env
+        - name: CORE_CONF_hadoop_http_staticuser_user
+          valueFrom:
+            configMapKeyRef:
+              key: CORE_CONF_hadoop_http_staticuser_user
+              name: hadoop-env
+        - name: CORE_CONF_hadoop_proxyuser_hue_groups
+          valueFrom:
+            configMapKeyRef:
+              key: CORE_CONF_hadoop_proxyuser_hue_groups
+              name: hadoop-env
+        - name: CORE_CONF_hadoop_proxyuser_hue_hosts
+          valueFrom:
+            configMapKeyRef:
+              key: CORE_CONF_hadoop_proxyuser_hue_hosts
+              name: hadoop-env
+        - name: HDFS_CONF_dfs_permissions_enabled
+          valueFrom:
+            configMapKeyRef:
+              key: HDFS_CONF_dfs_permissions_enabled
+              name: hadoop-env
+        - name: HDFS_CONF_dfs_webhdfs_enabled
+          valueFrom:
+            configMapKeyRef:
+              key: HDFS_CONF_dfs_webhdfs_enabled
+              name: hadoop-env
+        - name: SPARK_HOME
+          valueFrom:
+            configMapKeyRef:
+              key: SPARK_HOME
+              name: hadoop-env
+        - name: SPARK_MASTER
+          valueFrom:
+            configMapKeyRef:
+              key: SPARK_MASTER
+              name: hadoop-env
+        - name: SPARK_WORKER_CORES
+          valueFrom:
+            configMapKeyRef:
+              key: SPARK_WORKER_CORES
+              name: hadoop-env
+        - name: SPARK_WORKER_MEMORY
+          valueFrom:
+            configMapKeyRef:
+              key: SPARK_WORKER_MEMORY
+              name: hadoop-env
+        - name: YARN_CONF_yarn_log___aggregation___enable
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_log___aggregation___enable
+              name: hadoop-env
+        - name: YARN_CONF_yarn_log_server_url
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_log_server_url
+              name: hadoop-env
+        - name: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+              name: hadoop-env
+        - name: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+              name: hadoop-env
+        - name: YARN_CONF_yarn_nodemanager_resource_memory___mb
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_nodemanager_resource_memory___mb
+              name: hadoop-env
+        - name: YARN_CONF_yarn_resourcemanager_address
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_resourcemanager_address
+              name: hadoop-env
+        - name: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+              name: hadoop-env
+        - name: YARN_CONF_yarn_resourcemanager_hostname
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_resourcemanager_hostname
+              name: hadoop-env
+        - name: YARN_CONF_yarn_resourcemanager_recovery_enabled
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_resourcemanager_recovery_enabled
+              name: hadoop-env
+        - name: YARN_CONF_yarn_resourcemanager_resource___tracker_address
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_resourcemanager_resource___tracker_address
+              name: hadoop-env
+        - name: YARN_CONF_yarn_resourcemanager_scheduler_address
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_resourcemanager_scheduler_address
+              name: hadoop-env
+        - name: YARN_CONF_yarn_resourcemanager_store_class
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_resourcemanager_store_class
+              name: hadoop-env
+        - name: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+              name: hadoop-env
+        - name: YARN_CONF_yarn_timeline___service_enabled
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_timeline___service_enabled
+              name: hadoop-env
+        - name: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+              name: hadoop-env
+        - name: YARN_CONF_yarn_timeline___service_hostname
+          valueFrom:
+            configMapKeyRef:
+              key: YARN_CONF_yarn_timeline___service_hostname
+              name: hadoop-env
+        image: bde2020/spark-worker:2.4.0-hadoop2.7
+        name: worker
+        resources:
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+        volumeMounts:
+        - mountPath: /spark/conf/
+          name: sparkmaster-worker-config
+      restartPolicy: Always
+      volumes:
+      - name: sparkmaster-worker-config
+        configMap:
+          name: sparkmaster-worker
+          items:
+            - key: config
+              path: spark-defaults.conf
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: worker
+  minReplicas: 2
+  maxReplicas: 4
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 70

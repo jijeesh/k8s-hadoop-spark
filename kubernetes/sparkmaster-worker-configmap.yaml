@@ -1,0 +1,20 @@
+apiVersion: v1
+data:
+  config: |-
+    spark.master            spark://sparkmaster:7077
+    spark.eventLog.enabled  true
+    # spark.eventLog.dir               hdfs://namenode:8021/directory
+    spark.serializer        org.apache.spark.serializer.KryoSerializer
+    spark.app.name          K1D-ClST-2
+    spark.io.compression.codec         org.apache.spark.io.LZ4CompressionCodec
+    spark.driver.extraJavaOptions      -Dfile.encoding=ISO8859-1
+    spark.ui.reverseProxy	true
+    spark.ui.reverseProxyUrl        http://spark-master.example.com
+    spark.master.rest.enabled	true
+    spark.deploy.mode  cluster
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: sparkmaster-worker
+  name: sparkmaster-worker

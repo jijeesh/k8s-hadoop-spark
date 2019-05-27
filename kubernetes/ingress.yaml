@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: spark-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: spark-master.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: sparkmaster
+          servicePort: 8080
+  - host: node-manager.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: nodemanager1
+          servicePort: 8042
+  - host: resource-manager.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: resourcemanager
+          servicePort: 8088
+  - host: history-server.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: historyserver
+          servicePort: 8188
+  - host: hue-browser.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: hue
+          servicePort: 8888
+  - host: hadoop-mgmt.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: namenode
+          servicePort: 50070
+  - host: spark-api.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: sparkmaster
+          servicePort: 6066
