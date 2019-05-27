@@ -28,3 +28,15 @@ kubectl -n hadoop-spark create -f nodemanager1-StatefulSet.yaml  -f nodemanager1
 kubectl -n hadoop-spark create -f historyserver-StatefulSet.yaml -f historyserver-service.yaml
 
  kubectl -n hadoop-spark create -f hue-deployment.yaml -f hue-service.yaml
+
+ -----------------
+ Dashboard per namespace
+
+ $ kubectl -n hadoop-spark apply -f kubernetes-dashboard-role.yaml -n default
+$ kubectl -n hadoop-spark apply -f kubernetes-dashboard-rolebinding.yaml -n default
+$ kubectl -n hadoop-spark apply -f kubernetes-dashboard-secret.yaml -n default
+
+$ helm install --name dash \
+    --namespace hadoop-spark \
+    -f values-dashboard.yaml \
+    stable/kubernetes-dashboard

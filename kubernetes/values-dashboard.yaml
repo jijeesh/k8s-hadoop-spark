@@ -1,0 +1,12 @@
+image:
+  repository: kubernetesdashboarddev/kubernetes-dashboard-amd64
+  tag: 7fa1563213bdcc3deaff42183511a243d4c04268
+
+extraArgs:
+  - --system-banner="Hadoop Spark Cluster"
+  - --namespace=hadoop-spark
+
+rbac:
+  clusterAdminRole: false
+  # enableSkipLogin: true
+  # enableInsecureLogin: true
