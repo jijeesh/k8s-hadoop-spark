@@ -22,7 +22,7 @@ spec:
           value: "false"
         - name: SPARK_HOME
           value: /spark
-        image: bde2020/spark-master:2.4.0-hadoop2.7
+        image: "{{ .Values.Master.Image }}:{{ .Values.Master.ImageTag }}"
         name: sparkmaster
         ports:
         - containerPort: 4040

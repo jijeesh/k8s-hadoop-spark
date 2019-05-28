@@ -21,7 +21,7 @@ spec:
         envFrom:
           - configMapRef:
               name: hadoop-env
-        image: bde2020/hadoop-nodemanager:2.0.0-hadoop2.7.4-java8
+        image: "{{ .Values.Nodemanager1.Image }}:{{ .Values.Nodemanager1.ImageTag }}"
         name: nodemanager1
         ports:
         - containerPort: 8042

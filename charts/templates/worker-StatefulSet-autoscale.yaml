@@ -21,7 +21,7 @@ spec:
         envFrom:
           - configMapRef:
               name: hadoop-env
-        image: bde2020/spark-worker:2.4.0-hadoop2.7
+        image: "{{ .Values.Worker.Image }}:{{ .Values.Worker.ImageTag }}"
         name: worker
         resources:
           requests:

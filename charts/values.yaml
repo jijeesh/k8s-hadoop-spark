@@ -2,12 +2,69 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+Master:
+  Name: master
+  Image: "bde2020/spark-master"
+  ImageTag: "2.4.0-hadoop2.7"
+  Replicas: 1
+  Component: "spark-master"
+  Cpu: "100m"
+  Memory: "512Mi"
+  ServicePort: 7077
+  ContainerPort: 7077
+  # Set Master JVM memory. Default 1g
+  # DaemonMemory: 1g
+  service:
+    type: ClusterIP
+    port: 80
 
-image:
-  repository: nginx
-  tag: stable
-  pullPolicy: IfNotPresent
+Worker:
+  Name: worker
+  Image: "bde2020/spark-worker"
+  ImageTag: "2.4.0-hadoop2.7"
+  Replicas: 1
+  Component: "spark-master"
+  Cpu: "100m"
+  Memory: "512Mi"
+  ServicePort: 7077
+  ContainerPort: 7077
+  # Set Master JVM memory. Default 1g
+  # DaemonMemory: 1g
+  service:
+    type: ClusterIP
+    port: 80
+
+Namenode:
+  Name: namenode
+  Image: "bde2020/hadoop-namenode"
+  ImageTag: "2.0.0-hadoop2.7.4-java8"
+  Replicas: 1
+  Component: "spark-master"
+  Cpu: "100m"
+  Memory: "512Mi"
+  ServicePort: 7077
+  ContainerPort: 7077
+  # Set Master JVM memory. Default 1g
+  # DaemonMemory: 1g
+  service:
+    type: ClusterIP
+    port: 80
+
+Nodemanager1:
+  Name: nodemanager1
+  Image: "bde2020/hadoop-nodemanager"
+  ImageTag: "2.0.0-hadoop2.7.4-java8"
+  Replicas: 1
+  Component: "spark-master"
+  Cpu: "100m"
+  Memory: "512Mi"
+  ServicePort: 7077
+  ContainerPort: 7077
+  # Set Master JVM memory. Default 1g
+  # DaemonMemory: 1g
+  service:
+    type: ClusterIP
+    port: 80
 
 imagePullSecrets: []
 nameOverride: ""
@@ -31,20 +88,30 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+
 
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+
+Persistence:
+    Master:
+      Enabled: true
+      ## etcd data Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ## set, choosing the default provisioner. (gp2 on AWS, standard on
+      ## GKE, AWS & OpenStack)
+      StorageClass: "rook-ceph-block"
+      ## Set default PVC size
+      Size: 10G
+      ## Set default PVC access mode: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+      AccessMode: ReadWriteOnce
+    Notebook:
+      Enabled: false
+      StorageClass: "-"
+      Size: 10G
+      AccessMode: ReadWriteOnce

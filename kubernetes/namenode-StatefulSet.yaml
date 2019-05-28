@@ -21,7 +21,7 @@ spec:
         envFrom:
           - configMapRef:
               name: hadoop-env
-        image: docker-reg.kore.korewireless.com/dinkand/namenode
+        image: "{{ .Values.Namenode.Image }}:{{ .Values.Namenode.ImageTag }}"
         name: namenode
         ports:
         - containerPort: 8020
